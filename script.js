@@ -121,16 +121,16 @@ const GameController = (() => {
     const players = [player1, player2];
     let active = players[0];
     let gameOver = false;
+    let winner = null;
 
     const playRound = (row, column) => {
         if (!gameBoard.getBoard()[row][column].isFilled() && !gameOver){
             gameBoard.fillCell(row, column, active.symbol);
             if (gameBoard.isWin(row,column)) {
-                console.log(`${active.name} wins!`);
+                winner = active;
                 gameOver = true;
             }
             if (gameBoard.isFull() && !gameOver){
-                console.log("tie!!");
                 gameOver = true;
             }
 
@@ -138,10 +138,10 @@ const GameController = (() => {
         }
         
     }
-
     const reset = ()=>{
         active = players[0];
         gameOver = false;
+        winner = null;
         gameBoard.reset();
     }
 
@@ -149,7 +149,9 @@ const GameController = (() => {
         active = active === players[0] ? players[1] : players[0];
     }
 
-    return {playRound, reset};
+    const getWinner = ()=> winner;
+    const isOver = ()=> gameOver;
+    return {playRound, reset, getWinner, isOver};
 
     
 
@@ -160,6 +162,7 @@ const ScreenController = (() => {
 
     const container = document.querySelector(".container");
     const resetButton = document.querySelector(".reset-button");
+    const message = document.querySelector(".winner");
 
     const updateScreen = () =>{
         container.innerHTML = '';
@@ -173,6 +176,14 @@ const ScreenController = (() => {
                 container.appendChild(cell);
             }
         })
+        if (GameController.isOver()){
+            if (GameController.getWinner()){
+                message.textContent = `${GameController.getWinner().name} wins!`;
+            } else {
+                message.textContent = "Tie!";
+            }
+            
+        }
     }
 
     function clickHandlerBoard(e) {
@@ -184,6 +195,7 @@ const ScreenController = (() => {
 
     function resetBoard(e) {
         GameController.reset();
+        message.textContent = '';
         updateScreen();
     }
     
